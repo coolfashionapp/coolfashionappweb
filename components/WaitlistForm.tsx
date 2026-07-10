@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { waitlistEndpoint } from "@/lib/config";
 
 type Role = "buyer" | "stylist";
 
@@ -27,19 +28,19 @@ export default function WaitlistForm() {
     setStatus("loading");
 
     try {
-      const res = await fetch("/api/waitlist", {
+      // The Apps Script Web App doesn't send CORS headers, so we can't read
+      // the response — use no-cors and treat a completed request as success.
+      // text/plain keeps it a "simple" request (no CORS preflight).
+      await fetch(waitlistEndpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed, role }),
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ email: trimmed.toLowerCase(), role }),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "something went wrong. please try again.");
-      }
       setStatus("done");
-    } catch (err) {
+    } catch {
       setStatus("idle");
-      setError(err instanceof Error ? err.message : "something went wrong.");
+      setError("something went wrong. please try again.");
     }
   }
 

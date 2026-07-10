@@ -1,7 +1,8 @@
 # bundl — website
 
 Waitlist landing page for **bundl**: curated vintage style bundles, handpicked
-by stylists. Built with Next.js (App Router) and TypeScript.
+by stylists. Built with Next.js (App Router + TypeScript), exported as a static
+site and hosted on **GitHub Pages**.
 
 The page has two sections:
 
@@ -19,60 +20,45 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Waitlist form
+## Waitlist form → Google Sheet
 
-The form on the hero is wired to a real endpoint at `POST /api/waitlist`
-([app/api/waitlist/route.ts](app/api/waitlist/route.ts)). It validates the
-email, normalizes it, and stores the signup with the selected role
-(`buyer` or `stylist`).
+The waitlist form submits directly from the browser to a **Google Apps Script
+Web App**, which appends each signup (`timestamp`, `email`, `role`) as a row in
+a Google Sheet. No backend server is needed, which is what makes static hosting
+on GitHub Pages possible.
 
-Storage is handled in [lib/waitlist-store.ts](lib/waitlist-store.ts):
+- Script: [google-apps-script/Code.gs](google-apps-script/Code.gs)
+- Endpoint: configured in [lib/config.ts](lib/config.ts) (override via
+  `NEXT_PUBLIC_WAITLIST_ENDPOINT`)
 
-- **Local development (no setup):** signups are appended to
-  `./data/waitlist.jsonl`. This file is gitignored.
-- **Production (Supabase):** set the env vars below and signups are inserted
-  into a `waitlist` table via the Supabase REST API.
+### Re-pointing to a different Sheet
 
-### Setting up Supabase (for production)
+1. In the Google Sheet: **Extensions → Apps Script**, paste
+   [google-apps-script/Code.gs](google-apps-script/Code.gs), **Save**.
+2. **Deploy → New deployment → Web app**, with **Execute as: Me** and
+   **Who has access: Anyone**. Copy the `/exec` URL.
+3. Set it as `NEXT_PUBLIC_WAITLIST_ENDPOINT` (locally in `.env.local`, or as a
+   GitHub Actions repo variable named `WAITLIST_ENDPOINT` for the deployed site),
+   or update the default in `lib/config.ts`.
 
-1. Create a free project at [supabase.com](https://supabase.com).
-2. In the SQL editor, create the table:
+> **Later: moving to a real backend.** When you're ready to switch off the Sheet
+> (e.g. to Supabase), just change the endpoint the form posts to in
+> `components/WaitlistForm.tsx` / `lib/config.ts`. Nothing else needs to change.
 
-   ```sql
-   create table waitlist (
-     id          bigint generated always as identity primary key,
-     email       text not null unique,
-     role        text not null default 'buyer',
-     created_at  timestamptz not null default now()
-   );
-   ```
+## Deploying (GitHub Pages)
 
-3. Copy [.env.example](.env.example) to `.env.local` and fill in:
+Deploys automatically via GitHub Actions
+([.github/workflows/deploy.yml](.github/workflows/deploy.yml)) on every push to
+`main`. One-time setup:
 
-   ```
-   SUPABASE_URL=https://<your-project-ref>.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
-   ```
+1. **Repo → Settings → Pages → Build and deployment → Source: GitHub Actions.**
+2. Push to `main`. The workflow builds the static export and publishes it.
+3. Live at **https://coolfashionapp.github.io/coolfashionappweb/**.
 
-   The service role key is secret — keep it server-side only.
-
-4. View or export signups from the Supabase dashboard (Table editor → `waitlist`).
-
-> Prefer a different backend (Formspree, a Google Sheet, Resend, etc.)? Swap the
-> implementation in `saveSignup()` — the API route and form don't need to change.
-
-## Deploying
-
-The project deploys as-is to [Vercel](https://vercel.com):
-
-1. Push this repo to GitHub.
-2. Import it in Vercel.
-3. Add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in the project's
-   Environment Variables.
-4. Deploy.
-
-(The local-file fallback only works in dev — serverless filesystems are
-ephemeral, so configure Supabase before shipping the waitlist.)
+The site is served under the `/coolfashionappweb` base path (set by the workflow
+via `NEXT_PUBLIC_BASE_PATH`). For local dev the base path is empty, so
+`localhost:3000` works normally. If you later add a custom domain, set
+`NEXT_PUBLIC_BASE_PATH` to empty in the workflow.
 
 ## Project structure
 
@@ -82,19 +68,21 @@ app/
   page.tsx             composes the page
   globals.css          all styles (ported from the design)
   icon.svg             favicon
-  api/waitlist/route.ts  waitlist endpoint
 components/
   Nav.tsx  Hero.tsx  PhoneMockup.tsx  WaitlistForm.tsx  Stylist.tsx  Footer.tsx
 lib/
-  waitlist-store.ts    signup persistence (Supabase + local fallback)
+  config.ts            base path + waitlist endpoint helpers
+google-apps-script/
+  Code.gs              paste into the Sheet's Apps Script editor
 public/assets/         logo + product images
+.github/workflows/
+  deploy.yml           build + deploy to GitHub Pages
 ```
 
 ## Scripts
 
-| Command         | Description                          |
-| --------------- | ------------------------------------ |
-| `npm run dev`   | Start the dev server                 |
-| `npm run build` | Production build                     |
-| `npm run start` | Serve the production build           |
-| `npm run lint`  | Lint                                 |
+| Command         | Description                                    |
+| --------------- | ---------------------------------------------- |
+| `npm run dev`   | Start the dev server                           |
+| `npm run build` | Static export to `out/`                        |
+| `npm run lint`  | Lint                                           |

@@ -1,3 +1,5 @@
+import { asset } from "@/lib/config";
+
 export default function PhoneMockup() {
   return (
     <div className="phone-wrap">
@@ -19,7 +21,7 @@ export default function PhoneMockup() {
 
           <div className="app-header">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/logo.png" alt="bundl" />
+            <img src={asset("/assets/logo.png")} alt="bundl" />
             <div className="ic">♡</div>
           </div>
 
@@ -27,7 +29,7 @@ export default function PhoneMockup() {
             <div className="app-cover">
               <span className="badge">your bundle is ready</span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/assets/cover.png" alt="" />
+              <img src={asset("/assets/cover.png")} alt="" />
             </div>
             <div className="app-card-body">
               <div className="title">carolyn bessette kennedy</div>
@@ -37,11 +39,11 @@ export default function PhoneMockup() {
 
           <div className="app-items">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <div><img src="/assets/item-1.png" alt="" /></div>
+            <div><img src={asset("/assets/item-1.png")} alt="" /></div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <div><img src="/assets/item-2.png" alt="" /></div>
+            <div><img src={asset("/assets/item-2.png")} alt="" /></div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <div><img src="/assets/item-3.png" alt="" /></div>
+            <div><img src={asset("/assets/item-3.png")} alt="" /></div>
           </div>
 
           <div className="app-cta">

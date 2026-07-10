@@ -1,9 +1,11 @@
+import { asset } from "@/lib/config";
+
 export default function Footer() {
   return (
     <footer>
       <div className="foot-inner">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/assets/logo.png" alt="bundl" />
+        <img src={asset("/assets/logo.png")} alt="bundl" />
         <div className="links">
           <a href="https://instagram.com" target="_blank" rel="noreferrer">
             instagram
