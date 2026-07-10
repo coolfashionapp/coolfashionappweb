@@ -1,0 +1,25 @@
+# Claude design specs (reference only — not pushed to repo)
+bundl website claude design zip/
+
+# Dependencies
+node_modules/
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Build output
+dist/
+build/
+
+# Local waitlist data (dev fallback store)
+/data/
+
+# Env & logs
+.env
+.env*.local
+*.log
+
+# OS
+.DS_Store
