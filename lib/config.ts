@@ -5,8 +5,9 @@ export const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 // Google Apps Script Web App URL that appends waitlist signups to the Sheet.
 // Overridable via NEXT_PUBLIC_WAITLIST_ENDPOINT; defaults to the live endpoint.
+// Use || (not ??) so an empty env value (e.g. an unset CI variable) also falls back.
 export const waitlistEndpoint =
-  process.env.NEXT_PUBLIC_WAITLIST_ENDPOINT ??
+  process.env.NEXT_PUBLIC_WAITLIST_ENDPOINT ||
   "https://script.google.com/macros/s/AKfycbzrtRxrM9fsnU7u4qppBfg4lAiY0bQ-gLonOUVRLSvlU_OHhNnonxts-nlRh-WwJbkgWQ/exec";
 
 // Prefix an absolute asset path with the base path.
