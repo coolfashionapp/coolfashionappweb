@@ -22,6 +22,8 @@ jobs:
     env:
       # Project site is served at https://coolfashionapp.github.io/coolfashionappweb
       NEXT_PUBLIC_BASE_PATH: /coolfashionappweb
+      # Emit a static HTML export for Pages (Railway leaves this unset → server mode)
+      STATIC_EXPORT: "true"
       # Optional override for the waitlist endpoint (falls back to the value in lib/config.ts)
       NEXT_PUBLIC_WAITLIST_ENDPOINT: ${{ vars.WAITLIST_ENDPOINT }}
       # Supabase waitlist backend. Anon key is public-by-design (RLS protects the table),
