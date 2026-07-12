@@ -10,6 +10,14 @@ export const waitlistEndpoint =
   process.env.NEXT_PUBLIC_WAITLIST_ENDPOINT ||
   "https://script.google.com/macros/s/AKfycbzrtRxrM9fsnU7u4qppBfg4lAiY0bQ-gLonOUVRLSvlU_OHhNnonxts-nlRh-WwJbkgWQ/exec";
 
+// Supabase project the waitlist also writes to (alongside the Sheet above).
+// Both are public-safe: the anon key only grants the INSERT the RLS policy allows.
+// Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local (local)
+// or as GitHub Actions repo variables/secrets (CI). Empty => the Supabase write is
+// skipped and only the Sheet receives the signup.
+export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
 // Prefix an absolute asset path with the base path.
 export function asset(path: string): string {
   return `${basePath}${path}`;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { waitlistEndpoint } from "@/lib/config";
+import { waitlistEndpoint, supabaseUrl, supabaseAnonKey } from "@/lib/config";
 
 type Role = "buyer" | "stylist";
 
@@ -27,18 +27,48 @@ export default function WaitlistForm() {
     setError(null);
     setStatus("loading");
 
-    try {
-      // The Apps Script Web App doesn't send CORS headers, so we can't read
-      // the response — use no-cors and treat a completed request as success.
-      // text/plain keeps it a "simple" request (no CORS preflight).
-      await fetch(waitlistEndpoint, {
+    const payload = { email: trimmed.toLowerCase(), role };
+
+    // Write to both backends. Each is independent — if one is down, the other
+    // still captures the signup, so we succeed as long as either request lands.
+    const writes: Promise<unknown>[] = [];
+
+    // Google Sheet (Apps Script) doesn't send CORS headers, so we can't read the
+    // response — use no-cors and treat a completed request as success. text/plain
+    // keeps it a "simple" request (no CORS preflight).
+    writes.push(
+      fetch(waitlistEndpoint, {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ email: trimmed.toLowerCase(), role }),
-      });
+        body: JSON.stringify(payload),
+      })
+    );
+
+    // Supabase REST insert. PostgREST sends proper CORS headers, so we can read
+    // the status and treat a non-2xx as a failed write. The anon key is public;
+    // the RLS "anon insert only" policy is what actually protects the table.
+    if (supabaseUrl && supabaseAnonKey) {
+      writes.push(
+        fetch(`${supabaseUrl}/rest/v1/waitlist`, {
+          method: "POST",
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify(payload),
+        }).then((res) => {
+          if (!res.ok) throw new Error(`supabase ${res.status}`);
+        })
+      );
+    }
+
+    const results = await Promise.allSettled(writes);
+    if (results.some((r) => r.status === "fulfilled")) {
       setStatus("done");
-    } catch {
+    } else {
       setStatus("idle");
       setError("something went wrong. please try again.");
     }

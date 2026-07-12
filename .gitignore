@@ -12,6 +12,7 @@ next-env.d.ts
 # Build output
 dist/
 build/
+*.tsbuildinfo
 
 # Local waitlist data (dev fallback store)
 /data/

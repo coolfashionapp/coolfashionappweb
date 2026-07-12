@@ -24,6 +24,10 @@ jobs:
       NEXT_PUBLIC_BASE_PATH: /coolfashionappweb
       # Optional override for the waitlist endpoint (falls back to the value in lib/config.ts)
       NEXT_PUBLIC_WAITLIST_ENDPOINT: ${{ vars.WAITLIST_ENDPOINT }}
+      # Supabase waitlist backend. Anon key is public-by-design (RLS protects the table),
+      # so these are plain repo Variables, not Secrets. Empty => Supabase write is skipped.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
 
