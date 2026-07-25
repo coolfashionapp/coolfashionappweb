@@ -11,7 +11,6 @@ export default function Stylist() {
         <div className="stylist-right">
           <p>
             payments, fulfillment, returns, and a built-in audience — handled.
-            you keep ~85% of every bundle.
           </p>
           <a href="#waitlist" className="stylist-cta">
             apply as a stylist <span aria-hidden="true">→</span>
